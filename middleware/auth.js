@@ -27,17 +27,24 @@ const userPassport = passport.use(new LocalStrategy({
 
         try {
             User.findOne({ email: userName }, async (err, user) => {
-                const passwordValidate = await bcrypt.compare(password, user.password);
-                if (err) { return console.log(err) }
-                if (!user) {
-                    let detail = { "Detail": "Unauthorised User" };
+                if(user)
+                {
+                    const passwordValidate = await bcrypt.compare(password, user.password);
+                    if (err) { return console.log(err) }
+                    if (!user) {
+                        let detail = { "Detail": "Unauthorised User" };
+                        return next(null, detail);
+                    }
+                    if (!passwordValidate) {
+                        let detail = { "Detail": "password not matched" };
+                        return next(null, detail);
+                    }
+                    return next(null, user.email);
+                }else{
+                    let detail={"detail":"user not found"};
                     return next(null, detail);
                 }
-                if (!passwordValidate) {
-                    let detail = { "Detail": "password not matched" };
-                    return next(null, detail);
-                }
-                return next(null, user.email);
+             
             });
         } catch (error) {
             console.log("error occure", error.message)

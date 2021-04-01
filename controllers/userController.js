@@ -53,6 +53,7 @@ const loginUser = (async (req, res) => {
             res.json({ ...data._doc, token });
         } else {
             let detail = { "detail": "unauthenticated user" };
+            res.send(detail);
         }
     } else {
         res.send(req.user);
@@ -119,6 +120,7 @@ const getTheUser = (async (req, res) => {
             res.send(data);
         } else {
             let detail = { "detail": "User not found" }
+            res.send(detail);
         }
     } else {
         let detail = { "detail": "user not found" };
@@ -176,6 +178,23 @@ const deleteUser = (async (req, res) => {
     }
 })
 
+
+// update user profile
+const updateProfile = (async (req, res) => {
+    const id = req.body.id;
+    const { firstName, lastName, email } = req.body;
+    if (id) {
+        const data = await User.findOne({ _id: id });
+        if (data) {
+            const user = await User.findByIdAndUpdate({ _id: id }, { $set: { firstName: firstName, lastName: lastName, email: email } });
+            res.json(user);
+        } else {
+            let detail = { "detail": "user not found" };
+            res.send(detail);
+        }
+    }
+})
+
 module.exports = {
     userRegister,
     loginUser,
@@ -183,5 +202,6 @@ module.exports = {
     resetPasword,
     getTheUser,
     updateUserPassword,
-    deleteUser
+    deleteUser,
+    updateProfile
 };

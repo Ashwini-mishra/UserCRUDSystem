@@ -10,5 +10,6 @@ router.post('/resetPassword', user.resetPasword);
 router.get('/getUserDetail',passport.authenticate,user.getTheUser);
 router.put('/updatePassword',passport.authenticate,user.updateUserPassword);
 router.delete('/deleteUser',passport.authenticate,user.deleteUser);
+router.put('/updateProfile',passport.authenticate,user.updateProfile);
 
 module.exports = router;
