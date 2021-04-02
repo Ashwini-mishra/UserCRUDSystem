@@ -27,8 +27,7 @@ const userPassport = passport.use(new LocalStrategy({
 
         try {
             User.findOne({ email: userName }, async (err, user) => {
-                if(user)
-                {
+                if (user) {
                     const passwordValidate = await bcrypt.compare(password, user.password);
                     if (err) { return console.log(err) }
                     if (!user) {
@@ -40,11 +39,11 @@ const userPassport = passport.use(new LocalStrategy({
                         return next(null, detail);
                     }
                     return next(null, user.email);
-                }else{
-                    let detail={"detail":"user not found"};
+                } else {
+                    let detail = { "detail": "user not found" };
                     return next(null, detail);
                 }
-             
+
             });
         } catch (error) {
             console.log("error occure", error.message)
@@ -66,7 +65,8 @@ const authenticate = (req, res, next) => {
                 req.body.id = data._conditions._id;
                 next();
             } else {
-                res.send("only admin have the permission to access");
+                let detail = { "detail": "in valid signature or token" }
+                res.send(detail);
             }
         } else {
             return res.send("Unauthenticated User");
@@ -76,6 +76,93 @@ const authenticate = (req, res, next) => {
         return res.send(err.message);
     }
 }
+// validate email
+function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
+// register user validate
+const userValidate = ((req, res, next) => {
+    try {
+        let message = [];
+        let  counter = 0;
+        if (req.body.firstName.length >= 3) {
+            counter++;
+
+        } else {
+            let detail = { "detail": "your name should be greater then or equal to 3 characters" };
+            message.push(detail);
+        }
+        if (/^(?=.*?[A-Z])(?=.*?[#?!@$%^&*-]).{8,}$/.test(req.body.password)) {
+            counter++;
+        } else {
+            let detail = { "deteil": "password must contain 8 character,one special character and one upperCase character" };
+            message.push(detail);
+        }
+        let validEmail = validateEmail(req.body.email);
+        if (validEmail) {
+            counter++;
+        } else {
+            let detail = { "detail": "please enter correct email formate" };
+            message.push(detail);
+        }
+        if(counter===3)
+        {
+            next();
+        }else{
+            res.send(message);
+        }
+    } catch (error) {
+        res.send(error.message);
+    }
+})
 
 
-module.exports = { userPassport, authenticate };
+// login validation
+const userLoginValidate = ((req, res, next) => {
+    try {
+        let counter=0;
+        let message = [];
+        let validEmail = validateEmail(req.body.email);
+        if (validEmail) {
+           counter++;
+        } else {
+            let detail = { "detail": "please enter correct email password" }
+            message.push(detail);
+        }
+
+        if (/^(?=.*?[A-Z])(?=.*?[#?!@$%^&*-]).{8,}$/.test(req.body.password)) {
+           counter++;
+        } else {
+            let detail = { "detail": "password must contain 8 character,one special character and one upperCase character" };
+            message.push(detail);
+        }
+
+        if(counter===2)
+        {
+            next();
+        }else{
+            res.send(message)
+        }
+    } catch (error) {
+        res.send(error.message);
+    }
+})
+
+// user password validation
+const userPasswordValidate = ((req, res, next) => {
+    try {
+        if (/^(?=.*?[A-Z])(?=.*?[#?!@$%^&*-]).{8,}$/.test(req.body.password)) {
+            next();
+        } else {
+            let detail = { "detail": "password must contain 8 character,one special character and one upperCase character" };
+            res.send(detail);
+        }
+    } catch (error) {
+        res.send(error.message);
+    }
+})
+
+
+module.exports = { userPassport, authenticate, userValidate, userLoginValidate, userPasswordValidate };

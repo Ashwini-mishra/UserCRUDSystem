@@ -30,6 +30,7 @@ const userRegister = async (req, res) => {
         let hash = await hashing(password, salt);
         hash = String(hash);
         if (!user) {
+            // const setdata = req.body;
             const data = User({ firstName: firstName, lastName: lastName, email: email, password: hash });
             await data.save();
             delete data._doc.password;
@@ -65,7 +66,7 @@ const resetPasswordLink = (async (req, res) => {
     let { email } = req.body;
     let data = await User.findOne({ email });
     if (data) {
-        let code = `<a href="http://localhost:5000/resetPassword/?email=${data.email}">Click to reset password</a>`
+        let code = `<a href="http://localhost:5000/api/resetPassword/?email=${data.email}">Click to reset password</a>`
         SendMail.sendMail(email, code, data.firstName);
         let detail = { 'detail': 'reset link is generated please check your mail' };
         res.send(detail);
@@ -82,7 +83,7 @@ const resetPasword = (async (req, res) => {
     let { password, repassword } = req.body;
     let data = await User.findOne({ email });
     if (data) {
-        if (password !== "" && repassword !== "" && password === repassword) {
+        if (password === repassword) {
             let salt = 10;
             repassword = String(repassword)
             let hash = await hashing(repassword, salt);
@@ -100,7 +101,7 @@ const resetPasword = (async (req, res) => {
                 res.send(detail)
             }
         } else {
-            let detail = { 'detail': 'password must be something and repeat password is equal to password' };
+            let detail = { 'detail': 'password and repeat password must be equal' };
             res.send(detail);
         }
     } else {
@@ -182,11 +183,11 @@ const deleteUser = (async (req, res) => {
 // update user profile
 const updateProfile = (async (req, res) => {
     const id = req.body.id;
-    const { firstName, lastName, email } = req.body;
     if (id) {
         const data = await User.findOne({ _id: id });
         if (data) {
-            const user = await User.findByIdAndUpdate({ _id: id }, { $set: { firstName: firstName, lastName: lastName, email: email } });
+            const updateData = req.body;
+            const user = await User.findByIdAndUpdate({ _id: id }, updateData);
             res.json(user);
         } else {
             let detail = { "detail": "user not found" };
