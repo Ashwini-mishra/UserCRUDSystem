@@ -8,7 +8,7 @@ router.post('/loginUser',passport.userLoginValidate, passport.userPassport.authe
 router.post('/forgotPassword',user.resetPasswordLink);
 router.post('/resetPassword',passport.userPasswordValidate ,user.resetPasword);
 router.get('/getUserDetail',passport.authenticate,user.getTheUser);
-router.put('/updatePassword',passport.authenticate,user.updateUserPassword);
+router.put('/updatePassword',passport.userPasswordValidate,passport.authenticate,user.updateUserPassword);
 router.delete('/deleteUser',passport.authenticate,user.deleteUser);
 router.put('/updateProfile',passport.authenticate,user.updateProfile);
 
