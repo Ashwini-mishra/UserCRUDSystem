@@ -69,7 +69,8 @@ const authenticate = (req, res, next) => {
                 res.send(detail);
             }
         } else {
-            return res.send("Unauthenticated User");
+            let detail={"detail":"Unauthenticated User"}
+            return res.send(detail);
         }
 
     } catch (err) {
@@ -86,32 +87,32 @@ function validateEmail(email) {
 const userValidate = ((req, res, next) => {
     try {
         let message = [];
-        let  counter = 0;
+        let  counter = 0,detail="",name,password,email;
         if (req.body.firstName.length >= 3) {
             counter++;
 
         } else {
-            let detail = { "detail": "your name should be greater then or equal to 3 characters" };
-            message.push(detail);
+            name =  "your name should be greater then or equal to 3 characters" ;
+            detail=({...message,name});
         }
         if (/^(?=.*?[A-Z])(?=.*?[#?!@$%^&*-]).{8,}$/.test(req.body.password)) {
             counter++;
         } else {
-            let detail = { "deteil": "password must contain 8 character,one special character and one upperCase character" };
-            message.push(detail);
+            password = "password must contain 8 character,one special character and one upperCase character" ;
+            detail=({...message,name,password});
         }
         let validEmail = validateEmail(req.body.email);
         if (validEmail) {
             counter++;
         } else {
-            let detail = { "detail": "please enter correct email formate" };
-            message.push(detail);
+            email =  "please enter correct email formate";
+            detail=({...message,name,password,email});
         }
         if(counter===3)
         {
             next();
         }else{
-            res.send(message);
+            res.send(detail);
         }
     } catch (error) {
         res.send(error.message);
@@ -123,27 +124,27 @@ const userValidate = ((req, res, next) => {
 const userLoginValidate = ((req, res, next) => {
     try {
         let counter=0;
-        let message = [];
+        let message = [],detail="",email,password;
         let validEmail = validateEmail(req.body.email);
         if (validEmail) {
            counter++;
         } else {
-            let detail = { "detail": "please enter correct email password" }
-            message.push(detail);
+            email = "please enter correct email password" ;
+            detail=({...message,email});
         }
 
         if (/^(?=.*?[A-Z])(?=.*?[#?!@$%^&*-]).{8,}$/.test(req.body.password)) {
            counter++;
         } else {
-            let detail = { "detail": "password must contain 8 character,one special character and one upperCase character" };
-            message.push(detail);
+            password ="password must contain 8 character,one special character and one upperCase character" ;
+            detail=({...message,password,email});
         }
 
         if(counter===2)
         {
             next();
         }else{
-            res.send(message)
+            res.send(detail)
         }
     } catch (error) {
         res.send(error.message);
